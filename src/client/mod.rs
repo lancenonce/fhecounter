@@ -1,23 +1,30 @@
+use std::env;
 use tokio::net::TcpStream;
-use tokio::io::{self, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
+use tfhe::{ConfigBuilder, generate_keys, FheUint8};
+use tfhe::prelude::*;
+use bincode::serialize;
 
-pub async fn run_client() {
-    let mut stream = TcpStream::connect("localhost:8080").await.unwrap();
+pub async fn start_client(port: u16) {
+    // Get the initial number from the command line
+    let args: Vec<String> = env::args().collect();
+    let initial_value: u8 = args[2].parse().expect("Please provide a number less than 100 as the third argument.");
 
-    let encrypted_data = encrypt_data();
+    // Generate keys
+    let config = ConfigBuilder::all_disabled().enable_default_uint8().build();
+    let (client_key, server_key) = generate_keys(config);
 
-    // Write encrypted data to the server
-    stream.write_all(&encrypted_data).await.unwrap();
+    // Encrypt the initial value
+    let initial_value = FheUint8::encrypt(initial_value, &client_key);
 
-    let _ = retrieve_and_decrypt();
-}
+    // Serialize the initial data to send to the server
+    let data = serialize(&(server_key, initial_value)).unwrap();
 
-fn encrypt_data() -> Vec<u8> {
-    // Encryption logic from zama
-    vec![0, 1, 2, 3, 4]
-}
+    // Connect to the server
+    let mut stream = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
 
-fn retrieve_and_decrypt() -> u8 {
-    // For the mock-up, we're returning a dummy value
-    42
+    // Send the data
+    stream.write_all(&data).await.unwrap();
+
+    // TODO: Add code to handle "increment" and "receive number" actions
 }

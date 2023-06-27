@@ -3,14 +3,8 @@ mod server;
 
 #[tokio::main]
 async fn main() {
-    // Run the server in the background
-    let server_handle = tokio::spawn(async {
-        server::run_server().await;
-    });
-
-    // Run the client
-    client::run_client().await;
-
-    // Wait for the server to finish
-    let _ = server_handle.await;
+    let port = 8080;
+    let server_future = server::start_server(port);
+    let client_future = client::start_client(port);
+    futures::join!(server_future, client_future);
 }
