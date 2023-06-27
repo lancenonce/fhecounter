@@ -1,5 +1,5 @@
 [package]
-name = "FHECounter"
+name = "fhecounter"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 tfhe = { version = "*", features = ["boolean", "shortint", "integer", "x86_64-unix"] }
+bincode = "1.3.3"
