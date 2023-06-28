@@ -7,18 +7,17 @@ use bincode::serialize;
 
 pub async fn start_client(port: u16) {
     // Get the initial number from the command line
-    let args: Vec<String> = env::args().collect();
-    let initial_value: u8 = args[2].parse().expect("Please provide a number less than 100 as the third argument.");
+    let initial_value: u8 = 0; // Initialize with 0
 
-    // Generate keys
+    // Generate keys on the client for privacy
     let config = ConfigBuilder::all_disabled().enable_default_uint8().build();
     let (client_key, server_key) = generate_keys(config);
 
     // Encrypt the initial value
-    let initial_value = FheUint8::encrypt(initial_value, &client_key);
+    let mut current_val = FheUint8::encrypt(initial_value, &client_key);
 
     // Serialize the initial data to send to the server
-    let data = serialize(&(server_key, initial_value)).unwrap();
+    let data = serialize(&(server_key, current_val)).unwrap();
 
     // Connect to the server
     let mut stream = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
@@ -26,5 +25,20 @@ pub async fn start_client(port: u16) {
     // Send the data
     stream.write_all(&data).await.unwrap();
 
-    // TODO: Add code to handle "increment" and "receive number" actions
+    loop {
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        let input = input.trim();
+        
+        match input {
+            "increment" => {
+                // TODO: Add code to encrypt 1, send to the server, and update current_val
+            },
+            "get" => {
+                // TODO: Add code to retrieve the current value from the server and decrypt it
+            },
+            _ => println!("Invalid command"),
+        }
+    }
 }
+
