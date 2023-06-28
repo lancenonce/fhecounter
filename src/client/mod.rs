@@ -5,10 +5,7 @@ use tfhe::{ConfigBuilder, generate_keys, FheUint8};
 use tfhe::prelude::*;
 use bincode::serialize;
 
-pub async fn start_client(port: u16) {
-    // Get the initial number from the command line
-    let initial_value: u8 = 0; // Initialize with 0
-
+pub async fn start_client(initial_value: u8, port: u16) {
     // Generate keys on the client for privacy
     let config = ConfigBuilder::all_disabled().enable_default_uint8().build();
     let (client_key, server_key) = generate_keys(config);
