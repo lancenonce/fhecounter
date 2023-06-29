@@ -27,7 +27,6 @@ async fn handle_client(mut socket: TcpStream) {
         (Ok(server_key), Ok(current_value)) => {
             let mut result = current_value.clone();
             set_server_key(server_key);
-
             println!("server key and initial value ready");
 
             loop {
